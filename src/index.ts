@@ -1,7 +1,15 @@
+//################################################## IMPORTS ##################################################
 import Koa from 'koa';
+import {graphqlHTTP} from 'koa-graphql';
 import KoaRouter from 'koa-router';
 import koaBodyParser from 'koa-bodyparser';
 import jwt from 'jsonwebtoken'
+import {
+  GraphQLSchema,
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLFloat
+} from 'graphql';
 
 //DATABASE
 const users = [{
@@ -27,6 +35,39 @@ interface IJwtPayload {
 }
 
 
+const sendPixMutation = {
+  type: GraphQLString, // mutation return (In this case a message)
+  args: {
+    pixKey: { type: GraphQLString }, 
+    value: { type: GraphQLFloat }
+  },
+  resolve: () => 'Success in pix transfer'
+};
+
+const mutationType = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    sendPix: sendPixMutation
+  }
+});
+
+// final schema
+const schema = new GraphQLSchema({
+  mutation: mutationType
+});
+
+const rootValue = {
+  sendPix: async (args: { pixKey: string; value: number }, context: { ctx: Koa.Context }) => {
+    
+    const { id } = context.ctx.state.user;
+
+    //Here would be the logic for account changes
+
+    // For now only a message for success
+    return `Pix value R$${args.value} to key ${args.pixKey} sent succesfully by:  ${id}.`;
+  }
+};
+
 const app = new Koa();
 const router = new KoaRouter();
 const PORT = 3000;
@@ -36,14 +77,11 @@ const CAPACITY = 10;
 const DRIP_INTERVAL = 1000 * 60 * 60; // 1 hour = 3600000 ms
 
 app.use(koaBodyParser());
-
-
-
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-// ################################################## ROUTES ##################################################
-// Login route, so only logged in users can access the buckets 
+
+// Login route, so only logged in users can access the buckets (UNPROTECTED)
 router.post('/login', async (ctx)=>{
     
     const { email, password } = ctx.request.body as ILoginRequest;
@@ -60,55 +98,16 @@ router.post('/login', async (ctx)=>{
     }
 })
 
-// Get User data based on ID available in ctx.state.user
-router.get('/me', async (ctx) => {
+app.use(
+  graphqlHTTP({
+    schema,
+    rootValue,
+    graphiql: true,
+    context: (ctx: Koa.Context) => ({ ctx }),
+  })
+);
 
-    const { id } = ctx.state.user;
-
-    const user = users.find(u => u.id === id);
-    if (user) 
-    {
-        ctx.body = user;
-    } 
-    else 
-    {
-        ctx.status = 404; // Not Found
-        ctx.body = { error: 'User not found' };
-    }
-});
-
-//################################################## MIDDLEWARES ##################################################
-
-// Leaky bucket middleware
-app.use(async (ctx, next) => {
-    
-  const userId = ctx.state.user.id;
-
-
-  if (!buckets.has(userId)) {
-    buckets.set(userId, { tokens: CAPACITY, lastDrip: Date.now() });
-  }
-
-  const bucket = buckets.get(userId)!;
-
-  // Checks for new tokens available
-  const now = Date.now();
-  const timePassed = now - bucket.lastDrip;
-  const tokensToAdd = Math.floor(timePassed / DRIP_INTERVAL);
-
-  bucket.tokens = Math.min(bucket.tokens + tokensToAdd, CAPACITY);
-  bucket.lastDrip = now;
-
-  if (bucket.tokens > 0) {
-    bucket.tokens--;
-    await next();
-  } else {
-    ctx.status = 429; // Too Many Requests
-    ctx.body = { error: 'Request limit reached' };
-  }
-});
-
-
+// Auth middleware (APPLIED TO ALL ROUTES THAT COME AFTER)
 app.use(async (ctx, next) => {
 
     const authHeader = ctx.request.headers.authorization;
@@ -143,6 +142,62 @@ app.use(async (ctx, next) => {
         ctx.body = { error: 'Unauthorized token' };
     }
 });
+
+// Leaky bucket middleware (Guarantees that requests are processed only if tokens are available)
+app.use(async (ctx, next) => {
+    
+  const userId = ctx.state.user.id;
+
+
+  if (!buckets.has(userId)) {
+    buckets.set(userId, { tokens: CAPACITY, lastDrip: Date.now() });
+  }
+
+  const bucket = buckets.get(userId)!;
+
+  // Checks for new tokens available
+  const now = Date.now();
+  const timePassed = now - bucket.lastDrip;
+  const tokensToAdd = Math.floor(timePassed / DRIP_INTERVAL);
+
+  bucket.tokens = Math.min(bucket.tokens + tokensToAdd, CAPACITY);
+  bucket.lastDrip = now;
+
+  if (bucket.tokens > 0) {
+    bucket.tokens--;
+    await next();
+  } else {
+    ctx.status = 429; // Too Many Requests
+    ctx.body = { error: 'Request limit reached' };
+  }
+});
+
+router.all('/graphql', graphqlHTTP({
+    schema,
+    rootValue,
+    graphiql: true,
+    context: (ctx: Koa.Context) => ({ ctx }),
+  }) as unknown as KoaRouter.IMiddleware);
+
+
+// Protected test route
+router.get('/me', async (ctx) => {
+
+    const { id } = ctx.state.user;
+
+    const user = users.find(u => u.id === id);
+    if (user) 
+    {
+        ctx.body = user;
+    } 
+    else 
+    {
+        ctx.status = 404; // Not Found
+        ctx.body = { error: 'User not found' };
+    }
+});
+
+
 
 app.listen(PORT, ()=>{
 
