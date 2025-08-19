@@ -6,7 +6,8 @@ interface IClientBucket {
   lastDrip: number;
 }
 
-const buckets = new Map<number, IClientBucket>();
+//FOR TESTING PURPOSES
+export const buckets = new Map<number, IClientBucket>();
 const CAPACITY = 10;
 const DRIP_INTERVAL = 1000 * 60 * 60; // 1 hour = 3600000 ms
 
