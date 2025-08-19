@@ -10,6 +10,7 @@ import {
   GraphQLString,
   GraphQLFloat
 } from 'graphql';
+import { leakyBucketMiddleware } from './middleware/leakyBucket.js';
 
 //DATABASE
 const users = [{
@@ -18,12 +19,6 @@ const users = [{
   password: 'password123'
 }];
 
-
-// Client Interface
-interface IClientBucket {
-  tokens: number;
-  lastDrip: number;
-}
 
 interface ILoginRequest {
   email: string;
@@ -71,10 +66,6 @@ const rootValue = {
 const app = new Koa();
 const router = new KoaRouter();
 const PORT = 3000;
-
-const buckets = new Map<number, IClientBucket>();
-const CAPACITY = 10;
-const DRIP_INTERVAL = 1000 * 60 * 60; // 1 hour = 3600000 ms
 
 app.use(koaBodyParser());
 app.use(router.routes());
@@ -144,33 +135,7 @@ app.use(async (ctx, next) => {
 });
 
 // Leaky bucket middleware (Guarantees that requests are processed only if tokens are available)
-app.use(async (ctx, next) => {
-    
-  const userId = ctx.state.user.id;
-
-
-  if (!buckets.has(userId)) {
-    buckets.set(userId, { tokens: CAPACITY, lastDrip: Date.now() });
-  }
-
-  const bucket = buckets.get(userId)!;
-
-  // Checks for new tokens available
-  const now = Date.now();
-  const timePassed = now - bucket.lastDrip;
-  const tokensToAdd = Math.floor(timePassed / DRIP_INTERVAL);
-
-  bucket.tokens = Math.min(bucket.tokens + tokensToAdd, CAPACITY);
-  bucket.lastDrip = now;
-
-  if (bucket.tokens > 0) {
-    bucket.tokens--;
-    await next();
-  } else {
-    ctx.status = 429; // Too Many Requests
-    ctx.body = { error: 'Request limit reached' };
-  }
-});
+app.use(leakyBucketMiddleware);
 
 router.all('/graphql', graphqlHTTP({
     schema,
