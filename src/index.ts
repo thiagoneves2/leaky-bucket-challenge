@@ -10,7 +10,7 @@ import {
   GraphQLString,
   GraphQLFloat
 } from 'graphql';
-import { leakyBucketMiddleware } from './middleware/leakyBucket.js';
+import { leakyBucketMiddleware } from './middleware/leakyBucket';
 
 //DATABASE
 const users = [{
@@ -46,8 +46,22 @@ const mutationType = new GraphQLObjectType({
   }
 });
 
+// Empty query type 
+const queryType = new GraphQLObjectType({
+
+  name: 'Query',
+  fields:{
+    hello:{
+      type: GraphQLString,
+      resolve: ()=> 'Query String',
+    },
+  },
+
+});
+
 // final schema
 const schema = new GraphQLSchema({
+  query: queryType,
   mutation: mutationType
 });
 
@@ -89,14 +103,6 @@ router.post('/login', async (ctx)=>{
     }
 })
 
-app.use(
-  graphqlHTTP({
-    schema,
-    rootValue,
-    graphiql: true,
-    context: (ctx: Koa.Context) => ({ ctx }),
-  })
-);
 
 // Auth middleware (APPLIED TO ALL ROUTES THAT COME AFTER)
 app.use(async (ctx, next) => {
