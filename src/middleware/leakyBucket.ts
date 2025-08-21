@@ -1,13 +1,13 @@
 import Koa from 'koa';
 
+export const buckets = new Map<number, IClientBucket>();
+
 // Client Interface
 interface IClientBucket {
   tokens: number;
   lastDrip: number;
 }
 
-//FOR TESTING PURPOSES
-export const buckets = new Map<number, IClientBucket>();
 const CAPACITY = 10;
 const DRIP_INTERVAL = 1000 * 60 * 60; // 1 hour = 3600000 ms
 
@@ -17,6 +17,7 @@ export const leakyBucketMiddleware = async(ctx: Koa.Context, next: Koa.Next) =>{
 
     if (!buckets.has(userId)) {
         buckets.set(userId, { tokens: CAPACITY, lastDrip: Date.now() });
+        
         }
 
         const bucket = buckets.get(userId)!;
@@ -28,12 +29,16 @@ export const leakyBucketMiddleware = async(ctx: Koa.Context, next: Koa.Next) =>{
 
         bucket.tokens = Math.min(bucket.tokens + tokensToAdd, CAPACITY);
         bucket.lastDrip = now;
+        
+        
 
         if (bucket.tokens > 0) {
         bucket.tokens--;
+        
         await next();
         } else {
         ctx.status = 429; // Too Many Requests
         ctx.body = { error: 'Request limit reached' };
+        
     }
 }
