@@ -15,11 +15,9 @@ export const leakyBucketMiddleware = async(ctx: Koa.Context, next: Koa.Next) =>{
 
     const userId = ctx.state.user.id;
 
-    console.log(`\n--- Requisição recebida para o usuário: ${userId} ---`);
-
     if (!buckets.has(userId)) {
         buckets.set(userId, { tokens: CAPACITY, lastDrip: Date.now() });
-        console.log(`[Balde] Novo balde criado para o usuário ${userId}`);
+        
         }
 
         const bucket = buckets.get(userId)!;
@@ -32,15 +30,15 @@ export const leakyBucketMiddleware = async(ctx: Koa.Context, next: Koa.Next) =>{
         bucket.tokens = Math.min(bucket.tokens + tokensToAdd, CAPACITY);
         bucket.lastDrip = now;
         
-        console.log(`[Balde] Tokens atuais antes da requisição: ${bucket.tokens}`);
+        
 
         if (bucket.tokens > 0) {
         bucket.tokens--;
-        console.log(`[Balde] Requisição permitida. Tokens restantes: ${bucket.tokens}`);
+        
         await next();
         } else {
         ctx.status = 429; // Too Many Requests
         ctx.body = { error: 'Request limit reached' };
-        console.log(`[Balde] Requisição rejeitada. Balde vazio!`);
+        
     }
 }

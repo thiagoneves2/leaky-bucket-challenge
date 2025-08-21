@@ -29,6 +29,7 @@ interface IJwtPayload {
   userId: number;
 }
 
+const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret';
 
 const sendPixMutation = {
   type: GraphQLString, // mutation return (In this case a message)
@@ -78,23 +79,26 @@ const rootValue = {
 };
 
 const app = new Koa();
-const router = new KoaRouter();
 const PORT = 3000;
 
+//SEPARATING PUBLIC AND PROTECTED ROUTES
+const publicRouter = new KoaRouter();
+const protectedRouter = new KoaRouter();
+
+// GLOBAL INITIAL MIDDLEWARE
 app.use(koaBodyParser());
-app.use(router.routes());
-app.use(router.allowedMethods());
+
 
 
 // Login route, so only logged in users can access the buckets (UNPROTECTED)
-router.post('/login', async (ctx)=>{
+publicRouter.post('/login', async (ctx)=>{
     
     const { email, password } = ctx.request.body as ILoginRequest;
 
     const user = users.find(u => u.email === email && u.password === password);
     if (user) {
         //Generate token
-        const token = jwt.sign({ userId: user.id }, '<pix secret>', { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
 
         ctx.body = { token };
     } else {
@@ -103,6 +107,8 @@ router.post('/login', async (ctx)=>{
     }
 })
 
+// PUBLIC ROUTE
+app.use(publicRouter.routes()).use(publicRouter.allowedMethods())
 
 // Auth middleware (APPLIED TO ALL ROUTES THAT COME AFTER)
 app.use(async (ctx, next) => {
@@ -118,32 +124,31 @@ app.use(async (ctx, next) => {
     const token = authHeader.split(' ')[1] as string;
 
     try {
-        const decoded = jwt.verify(token, '<pix secret>');
+        const decoded = jwt.verify(token, JWT_SECRET);
 
         // Checking if the property userId exists
-        if (typeof decoded === 'object' && decoded !== null && 'userId' in decoded)
-        {  
-            ctx.state.user = { id: (decoded as { userId: number }).userId };
-            await next();
-        } 
-        else 
-        {
-            ctx.status = 401;
-            ctx.body = { error: 'Token is not valid' };
+        if (!decoded || typeof decoded !== "object" || !("userId" in decoded)) {
+          ctx.status = 401;
+          ctx.body = { error: "Token is not valid" };
+          return; 
         }
+
+        ctx.state.user = { id: (decoded as any).userId };
+
         await next();
     } 
     catch (err) 
     {
         ctx.status = 401; // Unauthorized
         ctx.body = { error: 'Unauthorized token' };
+        return;
     }
 });
 
 // Leaky bucket middleware (Guarantees that requests are processed only if tokens are available)
 app.use(leakyBucketMiddleware);
 
-router.all('/graphql', graphqlHTTP({
+protectedRouter.all('/graphql', graphqlHTTP({
     schema,
     rootValue,
     graphiql: true,
@@ -152,7 +157,7 @@ router.all('/graphql', graphqlHTTP({
 
 
 // Protected test route
-router.get('/me', async (ctx) => {
+protectedRouter.get('/me', async (ctx) => {
 
     const { id } = ctx.state.user;
 
@@ -167,6 +172,8 @@ router.get('/me', async (ctx) => {
         ctx.body = { error: 'User not found' };
     }
 });
+// PROTECTED ROUTES
+app.use(protectedRouter.routes()).use(protectedRouter.allowedMethods())
 
 
 
