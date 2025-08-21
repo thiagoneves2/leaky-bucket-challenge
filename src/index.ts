@@ -11,6 +11,8 @@ import {
   GraphQLFloat
 } from 'graphql';
 import { leakyBucketMiddleware } from './middleware/leakyBucket';
+import cors from '@koa/cors';
+
 
 //DATABASE
 const users = [{
@@ -87,6 +89,7 @@ const protectedRouter = new KoaRouter();
 
 // GLOBAL INITIAL MIDDLEWARE
 app.use(koaBodyParser());
+app.use(cors({origin: '*'})) // For development everybody, however IN PRODUCTION RESTRICT THE ORIGIN
 
 
 
