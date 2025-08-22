@@ -10,7 +10,7 @@ import {
   GraphQLString,
   GraphQLFloat
 } from 'graphql';
-import { leakyBucketMiddleware } from './middleware/leakyBucket';
+import { leakyBucketMiddleware } from './middleware/leakyBucket.js';
 import cors from '@koa/cors';
 
 
