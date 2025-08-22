@@ -1,69 +1,94 @@
-# React + TypeScript + Vite
+### Pix Frontend (React + Relay)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A minimal React + Relay UI that simulates initiating a Pix transfer against a Koa/GraphQL backend. This README focuses on **schema generation (PowerShell)**, **Relay artifacts**, and a clean **developer workflow** with brief notes recruiters care about.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### ✨ Tech Stack
+- React + TypeScript (Vite)
+- Relay (GraphQL client, compile-time artifacts)
+- Tailwind CSS v4
+- Vite dev server & build
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 📦 Project Structure
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+pix-frontend/
+├─ relay.config.json # Relay compiler config
+├─ schema.graphql # GraphQL SDL (generated from backend)
+├─ src/
+│ ├─ RelayEnvironment.ts # Relay network (Bearer token via localStorage)
+│ ├─ api/auth.ts # login/logout helpers
+│ ├─ mutations/SendPixMutation.ts # Relay mutation for sendPix
+│ ├─ generated/ # Relay artifacts (generated)
+│ ├─ App.tsx # UI (Login + Send Pix form)
+│ ├─ main.tsx # Wraps App in Relay provider
+│ └─ index.css # Tailwind entry
+├─ postcss.config.js # PostCSS using @tailwindcss/postcss
+├─ tailwind.config.js # (optional in v4)
+├─ index.html
+└─ package.json
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 🔐 Generate schema.graphql (PowerShell)
+
+run inside pix-frontend/
+
+1) Login -> token
+
+```powershell
+$token = (Invoke-RestMethod `
+  -Uri http://localhost:3000/login `
+  -Method Post `
+  -ContentType 'application/json' `
+  -Body '{"email":"test@example.com","password":"password123"}').token
+```
+2) Download schema (SDL)
+
+```powershell
+npx get-graphql-schema http://localhost:3000/graphql `
+  -h "Authorization=Bearer $token" > schema.graphql
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+3) Normalize attributes/permissions (if Windows locks the file)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```powershell
+attrib -R -H .\schema.graphql
+icacls .\schema.graphql /grant "$env:USERNAME:(R,W)" /T
+(Get-Content .\schema.graphql) | Set-Content -Encoding utf8 .\schema.graphql
 ```
+---
+
+### 🧩 Generate Relay Artifacts
+
+relay.config.json
+```json
+{
+  "src": "./src",
+  "schema": "./schema.graphql",
+  "language": "typescript",
+  "artifactDirectory": "./src/__generated__"
+}
+```
+
+Create the artifacts dir once:
+
+```powershell
+  mkdir .\src\__generated__ -Force
+```
+
+Compile artifacts (Windows uses no watch mode):
+
+```powershell
+  npm run relay
+```
+
+When Graphql operations or shcema change has to be re-run
+
+---
+
+### 🔒 Security Notes (Backend)
+
+In production don't forget to change backend CORS to a custom URL
