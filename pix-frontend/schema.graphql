@@ -1,0 +1,13 @@
+
+directive @specifiedBy(
+  url: String!
+) on SCALAR
+
+type Mutation {
+  sendPix(pixKey: String, value: Float): String
+}
+
+type Query {
+  hello: String
+}
+

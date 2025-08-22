@@ -4,3 +4,7 @@ package-lock.json
 
 # Compiled codes
 dist/
+
+.env
+*.log
+web/src/__generated__/
