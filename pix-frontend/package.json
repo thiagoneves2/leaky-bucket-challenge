@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "relay": "relay-compiler --watch",
+    "dev": "concurrently -n RELAY,VITE -c blue,green \"npm:relay\" \"vite\"",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
