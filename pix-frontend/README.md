@@ -15,21 +15,21 @@ A minimal React + Relay UI that simulates initiating a Pix transfer against a Ko
 
 ### 📦 Project Structure
 
-pix-frontend/
-├─ relay.config.json # Relay compiler config
-├─ schema.graphql # GraphQL SDL (generated from backend)
-├─ src/
-│ ├─ RelayEnvironment.ts # Relay network (Bearer token via localStorage)
-│ ├─ api/auth.ts # login/logout helpers
-│ ├─ mutations/SendPixMutation.ts # Relay mutation for sendPix
-│ ├─ generated/ # Relay artifacts (generated)
-│ ├─ App.tsx # UI (Login + Send Pix form)
-│ ├─ main.tsx # Wraps App in Relay provider
-│ └─ index.css # Tailwind entry
-├─ postcss.config.js # PostCSS using @tailwindcss/postcss
-├─ tailwind.config.js # (optional in v4)
-├─ index.html
-└─ package.json
+pix-frontend/ <br>
+├─ relay.config.json # Relay compiler config<br>
+├─ schema.graphql # GraphQL SDL (generated from backend)<br>
+├─ src/<br>
+│&nbsp; ├─ RelayEnvironment.ts # Relay network (Bearer token via localStorage)<br>
+│&nbsp; ├─ api/auth.ts # login/logout helpers<br>
+│&nbsp; ├─ mutations/SendPixMutation.ts # Relay mutation for sendPix<br>
+│&nbsp; ├─ generated/ # Relay artifacts (generated)<br>
+│&nbsp; ├─ App.tsx # UI (Login + Send Pix form)<br>
+│&nbsp; ├─ main.tsx # Wraps App in Relay provider<br>
+│&nbsp; └─ index.css # Tailwind entry<br>
+├─ postcss.config.js # PostCSS using @tailwindcss/postcss<br>
+├─ tailwind.config.js # (optional in v4)<br>
+├─ index.html<br>
+└─ package.json<br>
 
 ---
 
