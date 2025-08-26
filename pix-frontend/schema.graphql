@@ -1,7 +1,4 @@
-
-directive @specifiedBy(
-  url: String!
-) on SCALAR
+directive @specifiedBy(url: String!) on SCALAR
 
 type Mutation {
   sendPix(pixKey: String, value: Float): String
@@ -10,4 +7,3 @@ type Mutation {
 type Query {
   hello: String
 }
-

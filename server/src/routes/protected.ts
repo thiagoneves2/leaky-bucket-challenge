@@ -12,7 +12,7 @@ protectedRouter.all(
     schema,
     graphiql: true,
     context: (ctx: Koa.Context) => ({ ctx }),
-  }) as unknown as Router.IMiddleware
+  }) as unknown as Router.IMiddleware,
 );
 
 protectedRouter.get('/me', async (ctx) => {

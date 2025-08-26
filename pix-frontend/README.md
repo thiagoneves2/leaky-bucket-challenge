@@ -5,6 +5,7 @@ A minimal React + Relay UI that simulates initiating a Pix transfer against a Ko
 ---
 
 ### ✨ Tech Stack
+
 - React + TypeScript (Vite)
 - Relay (GraphQL client, compile-time artifacts)
 - Tailwind CSS v4
@@ -36,7 +37,7 @@ pix-frontend/
 
 run inside pix-frontend/
 
-1) Login -> token
+1. Login -> token
 
 ```powershell
 $token = (Invoke-RestMethod `
@@ -45,25 +46,28 @@ $token = (Invoke-RestMethod `
   -ContentType 'application/json' `
   -Body '{"email":"test@example.com","password":"password123"}').token
 ```
-2) Download schema (SDL)
+
+2. Download schema (SDL)
 
 ```powershell
 npx get-graphql-schema http://localhost:3000/graphql `
   -h "Authorization=Bearer $token" > schema.graphql
 ```
 
-3) Normalize attributes/permissions (if Windows locks the file)
+3. Normalize attributes/permissions (if Windows locks the file)
 
 ```powershell
 attrib -R -H .\schema.graphql
 icacls .\schema.graphql /grant "$env:USERNAME:(R,W)" /T
 (Get-Content .\schema.graphql) | Set-Content -Encoding utf8 .\schema.graphql
 ```
+
 ---
 
 ### 🧩 Generate Relay Artifacts
 
 relay.config.json
+
 ```json
 {
   "src": "./src",

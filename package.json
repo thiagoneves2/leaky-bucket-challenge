@@ -1,14 +1,20 @@
 {
   "name": "leaky-bucket-challenge",
   "private": true,
-  "workspaces": ["server", "web"],
+  "workspaces": [
+    "server",
+    "web"
+  ],
   "scripts": {
     "dev": "concurrently -n SERVER,WEB -c blue,green \"npm -w server run dev\" \"npm -w web run dev\"",
     "build": "npm -w server run build && npm -w web run build",
     "start": "npm -w server run start",
-    "schema": "npm -w web run schema" 
+    "schema": "npm -w web run schema",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
   },
   "devDependencies": {
-    "concurrently": "^9.0.0"
+    "concurrently": "^9.0.0",
+    "prettier": "^3.6.2"
   }
 }

@@ -10,18 +10,18 @@ import { PORT, CORS_ORIGIN } from './config/env';
 
 const app = new Koa();
 
-// Globais
+// Global
 app.use(bodyParser());
 app.use(cors({ origin: CORS_ORIGIN }));
 
-// Rotas públicas (antes do auth)
+// Public Routes (pre-auth)
 app.use(publicRouter.routes()).use(publicRouter.allowedMethods());
 
-// Auth + Rate limit (aplicam a tudo que vier após)
+// Auth + Rate limit 
 app.use(authMiddleware);
 app.use(leakyBucketMiddleware);
 
-// Rotas protegidas
+// Protected Routes
 app.use(protectedRouter.routes()).use(protectedRouter.allowedMethods());
 
 app.listen(PORT, () => {

@@ -34,8 +34,14 @@ export default function App() {
     setMsg('');
 
     const n = Number(value);
-    if (!Number.isFinite(n) || n <= 0) { setErr('Inform a numerical positive value'); return; }
-    if (!pixKey.trim()) { setErr('Inform pix key'); return; }
+    if (!Number.isFinite(n) || n <= 0) {
+      setErr('Inform a numerical positive value');
+      return;
+    }
+    if (!pixKey.trim()) {
+      setErr('Inform pix key');
+      return;
+    }
 
     commit({
       variables: { pixKey, value: n },
@@ -56,7 +62,9 @@ export default function App() {
         <h1 className="text-4xl font-extrabold tracking-tight">
           Pix Transaction <span className="text-indigo-400">(React + Relay)</span>
         </h1>
-        <p className="mt-2 text-slate-400">Simple pix simulator consuming the backend in Koa/GraphQL.</p>
+        <p className="mt-2 text-slate-400">
+          Simple pix simulator consuming the backend in Koa/GraphQL.
+        </p>
       </header>
 
       <main className="container mx-auto px-4 py-10 grid gap-8 md:grid-cols-2">
@@ -70,7 +78,7 @@ export default function App() {
               <input
                 className="mt-1 w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="email"
               />
             </label>
@@ -81,7 +89,7 @@ export default function App() {
                 type="password"
                 className="mt-1 w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="password"
               />
             </label>
@@ -127,7 +135,7 @@ export default function App() {
               <input
                 className="mt-1 w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
                 value={pixKey}
-                onChange={e => setPixKey(e.target.value)}
+                onChange={(e) => setPixKey(e.target.value)}
                 placeholder="email/cellphone/random"
               />
             </label>
@@ -137,7 +145,7 @@ export default function App() {
               <input
                 className="mt-1 w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
                 value={value}
-                onChange={e => setValue(e.target.value)}
+                onChange={(e) => setValue(e.target.value)}
                 placeholder="ex: 123.45"
               />
             </label>
@@ -147,7 +155,9 @@ export default function App() {
               disabled={inFlight || !token}
               className="mt-2 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 transition text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {inFlight && <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-transparent animate-spin"></span>}
+              {inFlight && (
+                <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-transparent animate-spin"></span>
+              )}
               Send!
             </button>
           </form>

@@ -3,7 +3,7 @@ export async function login(email: string, password: string) {
   const r = await fetch('http://localhost:3000/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ email, password }),
   });
   if (!r.ok) throw new Error('Login failed');
   const data = await r.json();

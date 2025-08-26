@@ -1,125 +1,115 @@
 {
-	"info": {
-		"_postman_id": "0a37b68a-cdec-48cf-a711-21dc96dc8d82",
-		"name": "Leaky Bucket Challenge",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "47762897",
-		"_collection_link": "https://tneves52-6545172.postman.co/workspace/Thiago's-Workspace~7b5d62dc-e42e-49e9-8668-46c24799db97/collection/47762897-0a37b68a-cdec-48cf-a711-21dc96dc8d82?action=share&source=collection_link&creator=47762897"
-	},
-	"item": [
-		{
-			"name": "login",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"if (pm.response.code === 200) {\r",
-							"  try {\r",
-							"    const { token } = pm.response.json();\r",
-							"    pm.environment.set(\"token\", token);\r",
-							"    console.log(\"Token salvo:\", token);\r",
-							"  } catch (e) {\r",
-							"    console.warn(\"Resposta não é JSON ou sem token:\", e);\r",
-							"  }\r",
-							"} else {\r",
-							"  console.warn(\"Login falhou. Status:\", pm.response.code);\r",
-							"}\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"packages": {},
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"test@example.com\",\r\n  \"password\": \"password123\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/login",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"login"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "send pix",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"query\": \"mutation ($pixKey: String!, $value: Float!) { sendPix(pixKey: $pixKey, value: $value) }\",\r\n  \"variables\": { \"pixKey\": \"chave@exemplo.com\", \"value\": 123.45 }\r\n}\r\n",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/graphql",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "0a37b68a-cdec-48cf-a711-21dc96dc8d82",
+    "name": "Leaky Bucket Challenge",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "47762897",
+    "_collection_link": "https://tneves52-6545172.postman.co/workspace/Thiago's-Workspace~7b5d62dc-e42e-49e9-8668-46c24799db97/collection/47762897-0a37b68a-cdec-48cf-a711-21dc96dc8d82?action=share&source=collection_link&creator=47762897"
+  },
+  "item": [
+    {
+      "name": "login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {\r",
+              "  try {\r",
+              "    const { token } = pm.response.json();\r",
+              "    pm.environment.set(\"token\", token);\r",
+              "    console.log(\"Token salvo:\", token);\r",
+              "  } catch (e) {\r",
+              "    console.warn(\"Resposta não é JSON ou sem token:\", e);\r",
+              "  }\r",
+              "} else {\r",
+              "  console.warn(\"Login falhou. Status:\", pm.response.code);\r",
+              "}\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "packages": {},
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"test@example.com\",\r\n  \"password\": \"password123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "send pix",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [""],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"query\": \"mutation ($pixKey: String!, $value: Float!) { sendPix(pixKey: $pixKey, value: $value) }\",\r\n  \"variables\": { \"pixKey\": \"chave@exemplo.com\", \"value\": 123.45 }\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/graphql",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["graphql"]
+        }
+      },
+      "response": []
+    }
+  ]
 }
